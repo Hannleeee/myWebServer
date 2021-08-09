@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "csapp.h": "c",
+        "iostream": "cpp",
+        "cstdlib": "cpp",
+        "ostream": "cpp"
+    }
+}

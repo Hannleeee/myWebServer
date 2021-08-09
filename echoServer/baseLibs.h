@@ -1,16 +1,21 @@
 #ifndef BASELIBS_H
 #define BASELIBS_H
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
 #include <cstring>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <type_traits>
 
-// #define MAXLINE 8192
-
+#define MAXLINE 8192
+#define MAXBUF   8192
+#define LISTENQ  1024 
 // // rio related
 // #define RIO_BUFSIZE 8192
 
@@ -25,16 +30,10 @@
 // ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 // void rio_readinitb(rio_t *rp, int fd);                  // to do what ?
 
-// // socket integrated interface
-// int Open_clientfd(char *hostnNme, char *port);
-// int Open_listenfd(char *port);
+// socket integrated interface
+int open_clientfd(char *hostnNme, char *port);
+int open_listenfd(char *port);
 
-bool isInt(char *c) {
-    while (*c != '\0') {
-        if (*c<'0' || *c>'9') return false;
-        ++c;
-    }
-    return true;
-}
+bool isInt(char *c);
 
 #endif
