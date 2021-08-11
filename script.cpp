@@ -1,31 +1,31 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+typedef long long ll;
 class Solution {
 public:
-    int prevSum(vector<int> &vec) {
-        int n = vec.size();
-        set<int> s;
-        int ret = 0;
-        for (int i=0; i<n; ++i) {
-            if (s.empty() || *s.begin()>=vec[i]) {
-                s.insert(vec[i]);
-                continue;
+    int numberOfArithmeticSlices(vector<int>& nums) {
+        int n = nums.size();
+        vector<vector<ll>> diff(n, vector<ll>(n));
+        vector<vector<int>> dp(n, vector<int>(n, 1));
+        unordered_map<string, vector<int>> memo;
+        int cnt = 0;
+        for (int row=n-1; row>=0; --row) {
+            for (int col=row+1; col<n; ++col) {
+                int newRow = col;
+                for (int newCol=newRow+1; newCol<n; ++newCol) {
+                    if ((ll)nums[newCol]+nums[row]==2*(ll)nums[col]) 
+                        dp[row][col] += dp[newRow][newCol];
+                }
+                cnt += dp[row][col] - 1;
             }
-            auto p = s.lower_bound(vec[i]);
-            if(p==s.end()) ret += *s.rbegin() * (i+1);
-            else {
-                while(*p>=vec[i]) --p;
-                ret += (*p) * (i+1);
-            };
-            s.insert(vec[i]);
         }
-        return ret;
+        return cnt;
     }
 };
 
 int main () {
-    vector<int> vec = {1,6,3,3,8};
+    vector<int> vec = {1,2,3,4,5,6,7};
     Solution s;
-    cout << s.prevSum(vec);
+    cout << s.numberOfArithmeticSlices(vec);
 }
