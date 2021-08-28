@@ -52,5 +52,6 @@ public:
 
 int main() {
     Solution s;
-    s.medianSlidingWindow({1,3,-1,-3,5,3,6,7}, 3);
+    vector<int> vec = {1,3,-1,-3,5,3,6,7};
+    s.medianSlidingWindow(vec, 3);
 }   
