@@ -1,31 +1,56 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
 
-typedef long long ll;
 class Solution {
 public:
-    int numberOfArithmeticSlices(vector<int>& nums) {
+    priority_queue<int, vector<int>, greater<>> pq1; 
+    priority_queue<int, vector<int>, less<>> pq2;
+
+    void balance() {
+        while (pq1.size()>=pq2.size()+2) {
+            pq2.push(pq1.top());
+            pq1.pop();
+        }
+        while (pq2.size()>=pq1.size()+1) {
+            pq1.push(pq2.top());
+            pq2.pop();
+        }
+    }
+
+    vector<double> medianSlidingWindow(vector<int>& nums, int k) {
         int n = nums.size();
-        vector<vector<ll>> diff(n, vector<ll>(n));
-        vector<vector<int>> dp(n, vector<int>(n, 1));
-        unordered_map<string, vector<int>> memo;
-        int cnt = 0;
-        for (int row=n-1; row>=0; --row) {
-            for (int col=row+1; col<n; ++col) {
-                int newRow = col;
-                for (int newCol=newRow+1; newCol<n; ++newCol) {
-                    if ((ll)nums[newCol]+nums[row]==2*(ll)nums[col]) 
-                        dp[row][col] += dp[newRow][newCol];
+        vector<double> ret(n-k+1);
+
+        for (int i=0; i<n; ++i) {
+            if (pq1.empty() && pq2.empty()) pq1.push(nums[i]);
+            else if (pq1.top()<=nums[i]) pq1.push(nums[i]);
+            else pq2.push(nums[i]);
+
+            if (i>=k) {
+                if (nums[i-k+1]>=pq1.top()) {
+                    while (pq1.top()!=nums[i-k+1]) {
+                        pq2.push(pq1.top());
+                        pq1.pop();
+                    }
+                    pq1.pop();
+                    balance();
                 }
-                cnt += dp[row][col] - 1;
+                else {
+                    while (pq2.top()!=nums[i-k+1]) {
+                        pq1.push(pq2.top());
+                        pq2.pop();
+                    }
+                    pq2.pop();
+                    balance();
+                }
+                ret[i-k] = (pq1.size()>pq2.size()) ? pq1.top() : double(pq1.top()+pq2.top())/2.0;
             }
         }
-        return cnt;
+        return ret;
     }
 };
 
-int main () {
-    vector<int> vec = {1,2,3,4,5,6,7};
+int main() {
     Solution s;
-    cout << s.numberOfArithmeticSlices(vec);
-}
+    s.medianSlidingWindow({1,3,-1,-3,5,3,6,7}, 3);
+}   
