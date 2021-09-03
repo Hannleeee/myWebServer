@@ -1,57 +1,99 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-class Solution {
+class heap {
 public:
-    priority_queue<int, vector<int>, greater<>> pq1; 
-    priority_queue<int, vector<int>, less<>> pq2;
+    heap() {
+        nums = new vector<int>();
+        _capacity = 0;
+        _size = 0;
+    }
 
-    void balance() {
-        while (pq1.size()>=pq2.size()+2) {
-            pq2.push(pq1.top());
-            pq1.pop();
+    heap(vector<int> &vec) {
+        // nums.assign(vec.begin(), vec.end());
+        nums = &vec;
+        _capacity = _size = nums->size();
+        heapify();
+    }
+
+    bool empty() {return _size==0;}
+    int size() { return _size; }
+    int top() { return (*nums)[0]; }
+
+    void push(int num) {
+        if (_size==_capacity) {
+            nums->push_back(num);
+            ++_capacity;
         }
-        while (pq2.size()>=pq1.size()+1) {
-            pq1.push(pq2.top());
-            pq2.pop();
+        else (*nums)[_size] = num;
+        ++_size;
+        filterUp(_size-1);
+    }
+
+    void pop() {
+        swap((*nums)[0], (*nums)[_size-1]);
+        --_size;
+        filterDown(0);
+    }
+
+    vector<int>::iterator getHeap() { return nums->begin(); }
+
+    void heapSort() {
+        while (_size) pop();
+    }
+private:
+    vector<int> *nums;
+    int _size, _capacity;
+    bool inHeap(int i) { return i>=0 && i<_size; }
+    int father(int i) { return (i-1)>>1; }
+    int lChild(int i) { return (i<<1)+1; }
+    int rChild(int i) { return (i+1)<<1; }
+    int properFather(int i) {
+        int father = i, l = lChild(i), r = rChild(i);
+        if (inHeap(l)&&(*nums)[l]>(*nums)[father]) father = l;
+        if (inHeap(r)&&(*nums)[r]>(*nums)[father]) father = r;
+        return father;
+    }
+    void filterUp(int i) {
+        int temp = (*nums)[i];
+        while (i>0 && temp>(*nums)[father(i)]) {
+            (*nums)[i] = (*nums)[father(i)];
+            i = father(i);
+        }
+        (*nums)[i] = temp;
+    }
+
+    void filterDown(int i) {
+        int father;
+        while ((father=properFather(i)) != i) {
+            swap((*nums)[i], (*nums)[father]);
+            i = father;
         }
     }
 
-    vector<double> medianSlidingWindow(vector<int>& nums, int k) {
-        int n = nums.size();
-        vector<double> ret(n-k+1);
+    void heapify() {
+        for (int i=father(_size-1); inHeap(i); --i) filterDown(i);
+    }
+};
 
-        for (int i=0; i<n; ++i) {
-            if (pq1.empty() && pq2.empty()) pq1.push(nums[i]);
-            else if (pq1.top()<=nums[i]) pq1.push(nums[i]);
-            else pq2.push(nums[i]);
-
-            if (i>=k) {
-                if (nums[i-k+1]>=pq1.top()) {
-                    while (pq1.top()!=nums[i-k+1]) {
-                        pq2.push(pq1.top());
-                        pq1.pop();
-                    }
-                    pq1.pop();
-                    balance();
-                }
-                else {
-                    while (pq2.top()!=nums[i-k+1]) {
-                        pq1.push(pq2.top());
-                        pq2.pop();
-                    }
-                    pq2.pop();
-                    balance();
-                }
-                ret[i-k] = (pq1.size()>pq2.size()) ? pq1.top() : double(pq1.top()+pq2.top())/2.0;
+class Solution {
+public:
+    vector<int> smallestK(vector<int>& arr, int k) {
+        heap h;
+        for (int num : arr) {
+            if (h.size()<k) h.push(num);
+            else if (h.top()>num) {
+                h.pop();
+                h.push(num);
             }
         }
-        return ret;
+        auto it = h.getHeap();
+        return vector<int> (it, it+h.size());
     }
 };
 
 int main() {
     Solution s;
-    vector<int> vec = {1,3,-1,-3,5,3,6,7};
-    s.medianSlidingWindow(vec, 3);
+    vector<int> a = {1,7,6,4,5,6,11,9};
+    s.smallestK(a, 4);
 }   

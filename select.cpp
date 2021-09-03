@@ -18,16 +18,20 @@ int main (int argc, char **argv) {
     FD_ZERO(&read_set);
     FD_SET(STDIN_FILENO, &read_set);
     FD_SET(listenfd, &read_set);
-
+    bool connected = false;
     while (1) {
         ready_set = read_set;
         select(listenfd+1, &ready_set, NULL, NULL, NULL);
         if (FD_ISSET(STDIN_FILENO, &ready_set)) command();
         if (FD_ISSET(listenfd, &ready_set)) {
-            clientlen = sizeof(struct sockaddr_storage);
-            connfd = accept(listenfd, (SA *)&clientaddr, &clientlen);
+            if (!connected){
+                clientlen = sizeof(struct sockaddr_storage);
+                connfd = accept(listenfd, (SA *)&clientaddr, &clientlen);
+                connected = true;
+            }
+            // std::cout << int(connfd) << std::endl;
             echo(connfd);
-            close(connfd);
+            // close(connfd);
         }
     }
 }

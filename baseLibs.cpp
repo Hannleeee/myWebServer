@@ -225,8 +225,9 @@ void echo(int connfd) {
     rio_t rio;
 
     rio_readinitb(&rio, connfd);
-    while ((n = rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+    if ((n = rio_readlineb(&rio, buf, MAXLINE)) != 0) {
         std::cout << "server received " << n << " bytes\n";
         rio_writen(connfd, buf, n);
     }
+    else close(connfd);
 }

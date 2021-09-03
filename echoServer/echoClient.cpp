@@ -14,12 +14,13 @@ int main(int argc, char *argv[]) {
     port = argv[2];
 
     clientfd = open_clientfd(host, port);
+    // std::cout << int(clientfd) << std::endl;
     rio_readinitb(&rio, clientfd);
     
     while (fgets(buf, MAXLINE, stdin)) {
         rio_writen(clientfd, buf, strlen(buf));
-        rio_readlineb(&rio, buf, MAXLINE);
-        fputs(buf, stdout);
+        // rio_readlineb(&rio, buf, MAXLINE);
+        // fputs(buf, stdout);
     }
     close(clientfd);
 
