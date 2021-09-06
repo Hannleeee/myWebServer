@@ -25,5 +25,4 @@ int main() {
         fprintf(stderr, "waitpid error: %s\n", strerror(errno));
         exit(0);
     }
-
 }
