@@ -36,6 +36,7 @@ void eval(char *cmdline) {
     if (argv[0] == nullptr) return;
 
     if (!builtin_command(argv)) {
+        printf("hello!\n");
         if ((pid = fork()) == 0) {     // child process
             if (execve(argv[0], argv, environ) < 0) {
                 printf("%s: Command not found\n", argv[0]);

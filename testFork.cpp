@@ -5,11 +5,11 @@
 #include <wait.h>
 #include <errno.h>
 #include <string.h>
-
+#include <iostream>
 int main() {
     int status, i;
     pid_t pid;
-
+    std::cout << "hello!" << std::endl;
     for (int i = 0; i < 3; ++i)
         if ((pid = fork()) == 0)
             exit(100+i);
