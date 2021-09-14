@@ -2,7 +2,7 @@
 using namespace std;
 
 // 找到不大于target的元素的最大秩
-int bSearch(vector<int> &nums, int target) {
+int binarySearch(vector<int> &nums, int target) {
     int lo = 0, hi = nums.size();
     while (lo<hi) {
         int mid = lo + (hi-lo>>1);
@@ -17,8 +17,8 @@ int bSearch(vector<int> &nums, int target) {
     return --lo;
 }
 
-// 找到等于target的元素的最小秩
-int bSearch(vector<int> &nums, int target) {
+// 找到大于等于target的元素的最小秩
+int binarySearch1(vector<int> &nums, int target) {
     int lo = 0, hi = nums.size();
     while (lo<hi) {
         int mid = lo + (hi-lo>>1);
@@ -27,5 +27,11 @@ int bSearch(vector<int> &nums, int target) {
         target>nums[mid] ? lo = mid + 1 : hi = mid;
     }
     // 也即退出搜索时hi=mid,故应返回hi
+    // 若返回值为nums.size()，则说明所有元素都小于target
     return hi;
+}
+
+int main() {
+    vector<int> nums = {1,2,5,7,14};
+    cout << binarySearch1(nums, 0);
 }
