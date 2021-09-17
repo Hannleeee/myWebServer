@@ -3,35 +3,24 @@ using namespace std;
 
 class Solution {
 public:
-    int requireD(vector<int> &weights, int target) {
-        int ret = 1;
-        int cnt = target;
-        for (int i=0; i<weights.size(); ++i) {
-            if (cnt<weights[i]) {
-                ++ret;
-                cnt = target;
+    bool isValidSudoku(vector<vector<char>>& board) {
+        vector<vector<bool>> cols(9, vector<bool>(9)), blocks(9, vector<bool>(9));
+        for (int i=0; i<9; ++i) {
+            vector<bool> row(9);
+            for (int j=0; j<9; ++j) {
+                if (board[i][j]!='.') {
+                    int num = board[i][j] - '1';
+                    if (row[num] || cols[j][num] || blocks[i/3+j-j%3][num]) return false;
+                    row[num] = cols[j][num] = blocks[i/3+j-j%3][num] = true;
+                }
             }
-            cnt -= weights[i];
         }
-        return ret;
-    }
-
-    int shipWithinDays(vector<int>& weights, int D) {
-        int n = weights.size();
-        int sum = accumulate(weights.begin(), weights.end(), 0);
-        int lo = 0, hi = sum;
-        while (lo<=hi) {
-            int mid = lo + (hi-lo>>1);
-            int d = requireD(weights, mid);
-            cout << mid << " " << d << endl;
-            d>D ? lo = mid + 1 : hi = mid-1;
-        }
-        return hi;
+        return true;
     }
 };
 
 int main() {
+    vector<vector<char>> borad = {{'8','3','.','.','7','.','.','.','.'},{'6','.','.','1','9','5','.','.','.'},{'.','9','8','.','.','.','.','6','.'},{'8','.','.','.','6','.','.','.','3'},{'4','.','.','8','.','3','.','.','1'},{'7','.','.','.','2','.','.','.','6'},{'.','6','.','.','.','.','2','8','.'},{'.','.','.','4','1','9','.','.','5'},{'.','.','.','.','8','.','.','7','9'}};
     Solution s;
-    vector<int> weights = {1,2,3,4,5,6,7,8,9,10};
-    cout << s.shipWithinDays(weights, 5);
-}   
+    cout << s.isValidSudoku(borad);
+}
