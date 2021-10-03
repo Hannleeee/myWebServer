@@ -1,3 +1,8 @@
+/* 
+参数名\成员变量：驼峰命名法
+类名、方法名：首字母大写的驼峰命名 
+若为private，则加_前缀
+*/
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
