@@ -118,10 +118,42 @@ void Buffer::Append(const Buffer &buff) {
     Append(buff.Peek(), buff.ReadableBytes());
 }
 
-ssize_t Buffer::ReadFd(int fd, int *Errno) {
+ssize_t Buffer::ReadFd(int fd, int *savedErrno) {
+    char buff[65535];
+    struct iovec iov[2];    // 用于分散读
+    const size_t writeable = WriteableBytes();
+    // 分散读，从fd读入，写入buffer！
+    // 使用分散读可以保证一次readv读入全部数据，否则需要更复杂的逻辑处理数据超长的情况
+    iov[0].iov_base = _BeginPtr() + _writePos;
+    iov[0].iov_len = writeable;
+    iov[1].iov_base = buff;
+    iov[1].iov_len = sizeof(buff);
 
+    // 若读成功，则返回读入的字节数
+    const ssize_t len = readv(fd, iov, 2);
+    if (len < 0) {
+        // 记录errno
+        *savedErrno = errno;
+    }
+    else if (static_cast<size_t>(len) <= writeable) {
+        // buffer剩余空间充足
+        _writePos += len;
+    }
+    else {
+        // buffer剩余空间不足，超出部分读入buff，然后追加到buffer中（_MakeSpace会自动调整内部空间结构）
+        _writePos = _buffer.size();
+        Append(buff, len - writeable);
+    }
+    return len;
 }
 
-ssize_t Buffer::WriteFd(int fd, int *Errno) {
-
+ssize_t Buffer::WriteFd(int fd, int *savedErrno) {
+    size_t readSize = ReadableBytes();
+    ssize_t len = write(fd, Peek(), readSize);
+    if (len < 0) {
+        *savedErrno = errno;
+        return len;
+    }
+    _readPos += len;
+    return len;
 }
