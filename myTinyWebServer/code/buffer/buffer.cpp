@@ -44,7 +44,7 @@ void Buffer::RetrieveUntil(const char *end) {
     Retrieve(end - Peek());
 }
 
-// 此函数并不用于读取字符，而是用于读取完全部剩余字符后对buffer的重置
+// 此函数并不用于读取字符，而是用于对buffer的重置
 void Buffer::RetrieveAll() {
     bzero(&_buffer[0], _buffer.size());
     _readPos = 0;
