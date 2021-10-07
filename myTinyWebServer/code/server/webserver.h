@@ -35,21 +35,21 @@ public:
     void Start();
 
 private:
-    bool InitSocket();
-    void InitEventMode(int trigMode);
-    void AddClient(int fd, sockaddr_in addr);
+    bool _InitSocket();
+    void _InitEventMode(int trigMode);
+    void _AddClient(int fd, sockaddr_in addr);
 
-    void DealListen();
-    void DealWrite(HttpConn *client);
-    void DealRead(HttpConn *client);
+    void _DealListen();
+    void _DealWrite(HttpConn *client);
+    void _DealRead(HttpConn *client);
 
-    void SendError(int fd, const char *info);
-    void ExtentTime(HttpConn *client);
-    void CloseConn(HttpConn *client);
+    void _SendError(int fd, const char *info);
+    void _ExtentTime(HttpConn *client);
+    void _CloseConn(HttpConn *client);
 
-    void OnRead(HttpConn *client);
-    void OnWrite(HttpConn *client);
-    void OnProcess(HttpConn *client);
+    void _OnRead(HttpConn *client);
+    void _OnWrite(HttpConn *client);
+    void _OnProcess(HttpConn *client);
 
     static const int MAX_FD = 65535;
 

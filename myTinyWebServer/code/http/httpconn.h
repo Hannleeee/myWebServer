@@ -35,7 +35,11 @@ public:
     bool process();
 
     int ToWriteBytes() {
-        return 
+        return _iov[0].iov_len + _iov[1].iov_len;
+    }
+
+    bool IsKeepAlive() const {
+        return _request.IsKeepAlive();
     }
 
     static bool isET;
@@ -47,6 +51,7 @@ private:
     struct sockaddr_in _addr;
 
     bool _isClose;
+
     int _iovCnt;
     struct iovec _iov[2];
 
