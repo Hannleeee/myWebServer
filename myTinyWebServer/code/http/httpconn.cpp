@@ -1,15 +1,13 @@
 #include "httpconn.h"
 
-const char *HttpConn::srcDir;
+const char* HttpConn::srcDir;
+std::atomic<int> HttpConn::userCount;
+bool HttpConn::isET;
 
 HttpConn::HttpConn() {
     _fd = -1;
     _addr = { 0 };
     _isClose = true;
-}
-
-HttpConn::~HttpConn() {
-    Close();
 }
 
 void HttpConn::init(int fd, const sockaddr_in &addr) {
@@ -20,7 +18,7 @@ void HttpConn::init(int fd, const sockaddr_in &addr) {
     _writeBuff.RetrieveAll();
     _readBuff.RetrieveAll();
     _isClose = false;
-    // LOG_INFO("Client[%d](%s:%d) in, userCount:%d", _fd, GetIP(), GetPort(), (int)userCount);
+    LOG_INFO("Client[%d](%s:%d) in, userCount:%d", _fd, GetIP(), GetPort(), (int)userCount);
 }
 
 void HttpConn::Close() {
@@ -36,7 +34,7 @@ struct sockaddr_in HttpConn::GetAddr() const {
 }
 
 const char *HttpConn::GetIP() const {
-    return inet_ntoa(_addr.sin_addr);
+    return inet_ntoa(_addr.sin_addr);   // 转换为点分十进制IP表示
 }
 
 int HttpConn::GetPort() const {
@@ -69,7 +67,7 @@ ssize_t HttpConn::write(int *saveErrno) {
             break;
         }
         else if (static_cast<size_t>(len) > _iov[0].iov_len) {
-            // ???没看懂???
+            // _iov[0]全部写入，_iov[1]部分写入
             _iov[1].iov_base = (uint8_t *)_iov[1].iov_base + (len - _iov[0].iov_len);
             _iov[1].iov_len -= (len - _iov[0].iov_len);
             if (_iov[0].iov_len) {
@@ -78,6 +76,7 @@ ssize_t HttpConn::write(int *saveErrno) {
             }
         }
         else {
+            // 仅写入了_iov[0]
             _iov[0].iov_base = (uint8_t *)_iov[0].iov_base + len;
             _iov[0].iov_len -= len;
             _writeBuff.Retrieve(len);
@@ -92,7 +91,13 @@ bool HttpConn::process() {
         return false;
     }
     else if (_request.parse(_readBuff)) {
-        // LOG_DEBUG("%s", _request.path().c_str());
-        
+        LOG_DEBUG("%s", _request.path().c_str());
+        _response.Init();
+    } else {
+        _response.Init();
     }
+}
+
+HttpConn::~HttpConn() {
+    Close();
 }

@@ -55,8 +55,8 @@ private:
     int _iovCnt;
     struct iovec _iov[2];
 
-    Buffer _readBuff;
-    Buffer _writeBuff;
+    Buffer _readBuff;       // 读缓冲区
+    Buffer _writeBuff;      // 写缓冲区
 
     HttpRequest _request;
     HttpResponse _response;

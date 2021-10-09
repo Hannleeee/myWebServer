@@ -39,10 +39,10 @@ public:
     void Init();
     bool parse(Buffer &buff);
 
-    std::string Path() const;
-    std::string &Path();
-    std::string Method() const;
-    std::string Version() const;
+    std::string GetPath() const;
+    std::string &GetPath();
+    std::string GetMethod() const;
+    std::string GetVersion() const;
     std::string GetPost(const std::string &key) const;
     std::string GetPost(const char *key) const;
 
