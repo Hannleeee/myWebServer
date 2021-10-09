@@ -55,7 +55,7 @@ void BlockDeque<T>::Close() {
     _condConsumer.notify_all();
 }
 
-// 干啥用的？单纯刷新下状态？
+// 强制刷新队列
 template<typename T>
 void BlockDeque<T>::Flush() {
     _condConsumer.notify_one();
