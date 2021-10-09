@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <sys/time.h>
 
+// 基于生产者消费者模型的缓冲区
 template<typename T>
 class BlockDeque {
 public:
@@ -49,11 +50,12 @@ void BlockDeque<T>::Close() {
         _deq.clear();
         _isClose = true;
     }
+    // 为啥要关闭了还通知生产者消费者？？
     _condProducer.notify_all();
     _condConsumer.notify_all();
 }
 
-// 干啥用的？
+// 干啥用的？单纯刷新下状态？
 template<typename T>
 void BlockDeque<T>::Flush() {
     _condConsumer.notify_one();
@@ -135,7 +137,7 @@ bool BlockDeque<T>::Pop(T &item) {
 template<typename T>
 bool BlockDeque<T>::Pop(T &item, int timeout) {
     std::unique_lock<std::mutex> locker(_mtx);
-    whlie (_deq.empty()) {
+    while (_deq.empty()) {
         if (_condConsumer.wait_for(locker, std::chrono::seconds(timeout)) == std::cv_status::timeout) return false;
         if (_isClose) return false;
     }
