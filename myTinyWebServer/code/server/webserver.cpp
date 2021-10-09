@@ -28,14 +28,14 @@ void WebServer::_SendError(int fd, const char *info) {
     assert(fd > 0);
     int ret = send(fd, info, strlen(info), 0);
     if (ret < 0) {
-        // LOG_WARN("send error to client[%d] error!", fd);
+        LOG_WARN("send error to client[%d] error!", fd);
     }
     close(fd);
 }
 
 void WebServer::_CloseConn(HttpConn *client) {
     assert(client);
-    // LOG_INFO("Client[%d] quit!", client->GetFd());
+    LOG_INFO("Client[%d] quit!", client->GetFd());
     _epoller->DelFd(client->GetFd());
     client->Close();
 }
@@ -50,7 +50,7 @@ void WebServer::_AddClient(int fd, sockaddr_in addr) {
     }
     _epoller->AddFd(fd, EPOLLIN | _connEvent);
     SetFdNonblock(fd);
-    // LOG_INFO("Client[%d] in!", _user[fd].GetFd());
+    LOG_INFO("Client[%d] in!", _users[fd].GetFd());
 }
 
 void WebServer::_DealListen() {
@@ -61,7 +61,7 @@ void WebServer::_DealListen() {
         if (fd <= 0) return ;
         else if (HttpConn::userCount >= MAX_FD) {
             _SendError(fd, "Server busy!");
-            // LOG_WARN("Client is full!");
+            LOG_WARN("Client is full!");
             return;
         }
         _AddClient(fd, addr);
@@ -142,7 +142,7 @@ bool WebServer::_InitSocket() {
     int ret;
     struct sockaddr_in addr;
     if (_port > 65535 || _port < 1024) {
-        // LOG_ERROR("Port:%d error!", _port);
+        LOG_ERROR("Port:%d error!", _port);
         return false;
     }
     addr.sin_family = AF_INET;
@@ -158,7 +158,7 @@ bool WebServer::_InitSocket() {
     // 建立监听描述符
     _listenFd = socket(AF_INET, SOCK_STREAM, 0);
     if (_listenFd < 0) {
-        // LOG_ERROR("Create socket error!", _port);
+        LOG_ERROR("Create socket error!", _port);
         return false;
     }
 
@@ -166,39 +166,39 @@ bool WebServer::_InitSocket() {
     ret = setsockopt(_listenFd, SOL_SOCKET, SO_LINGER, &optLinger, sizeof(optLinger));
     if (ret < 0) {
         close(_listenFd);
-        // LOG_ERROR("Init linger error!", _port);
+        LOG_ERROR("Init linger error!", _port);
         return false;
     }
     // 设置端口复用选项
     int optval = 1;
     ret = setsockopt(_listenFd, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval, sizeof(int));
     if (ret == -1) {
-        // LOG_ERROR("set socket setsockopt error!");
+        LOG_ERROR("set socket setsockopt error!");
         close(_listenFd);
         return false;
     }
 
     ret = bind(_listenFd, (struct sockaddr *)&addr, sizeof(addr));
     if (ret < 0) {
-        // LOG_ERROR("Bind port:%d error!", _port);
+        LOG_ERROR("Bind port:%d error!", _port);
         close(_listenFd);
         return false;
     }
     // 为啥设置为6呢？一般好像都设为1024啊
     ret = listen(_listenFd, 6);
     if (ret < 0) {
-        // LOG_ERROR("Listen port:%d error!", _port);
+        LOG_ERROR("Listen port:%d error!", _port);
         close(_listenFd);
         return false;
     }
     ret = _epoller->AddFd(_listenFd, _listenEvent | EPOLLIN);
     if (ret == 0) {
-        // LOG_ERROR("Add listen error!");
+        LOG_ERROR("Add listen error!");
         close(_listenFd);
         return false;
     }
     SetFdNonblock(_listenFd);
-    // LOG_INFO("Server port:%d", _port);
+    LOG_INFO("Server port:%d", _port);
     return true;
 }
 
