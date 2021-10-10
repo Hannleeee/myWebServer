@@ -90,14 +90,27 @@ bool HttpConn::process() {
     if (_readBuff.ReadableBytes() <= 0) {
         return false;
     }
-    else if (_request.parse(_readBuff)) {
-        LOG_DEBUG("%s", _request.path().c_str());
-        _response.Init();
+    else if (_request.Parse(_readBuff)) {
+        LOG_DEBUG("%s", _request.GetPath().c_str());
+        _response.Init(srcDir, _request.GetPath(), _request.IsKeepAlive(), 200);
     } else {
-        _response.Init();
+        _response.Init(srcDir, _request.GetPath(), false, 400);
     }
 
-    _
+    _response.MakeResponse(_writeBuff);
+    // 响应头
+    _iov[0].iov_base = const_cast<char *>(_writeBuff.Peek());
+    _iov[0].iov_len = _writeBuff.ReadableBytes();
+    _iovCnt = 1;
+
+    // 文件
+    if (_response.FileLen() > 0 && _response.File()) {
+        _iov[1].iov_base = _response.File();
+        _iov[1].iov_len = _response.FileLen();
+        _iovCnt = 2;
+    }
+    LOG_DEBUG("filesize:%d, %d to %d", _response.FileLen(), _iovCnt, ToWriteBytes());
+    return true;
 }
 
 HttpConn::~HttpConn() {
