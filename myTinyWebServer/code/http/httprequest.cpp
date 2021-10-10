@@ -103,7 +103,7 @@ void HttpRequest::_ParseHeader(const string &line) {
     if (regex_match(line, subMatch, pattern)) {
         _header[subMatch[1]] = subMatch[2];
     } else {
-        // HEADER全部解析完成，状态转换至BODY
+        // 已无匹配结果，说明HEADER全部解析完成，状态转换至BODY
         _state = BODY;
     }
 }
