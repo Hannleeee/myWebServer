@@ -118,7 +118,7 @@ void HeapTimer::Clear() {
 // 返回值类型应该为什么呢？？？
 int HeapTimer::GetNextTick() {
     Tick();
-    long long res = -1;
+    int res = -1;
     if (!_heap.empty()) {
         res = std::chrono::duration_cast<MS>(_heap.front().expires - Clock::now()).count();
         if (res < 0) res = 0;

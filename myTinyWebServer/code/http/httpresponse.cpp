@@ -115,7 +115,7 @@ void HttpResponse::ErrorContent(Buffer &buff, string message) {
         status = "Bad Request";
     }
     body += to_string(_code) + " : " + status + "\n";
-    body += "<p>" + message + "<\p>";
+    body += "<p>" + message + "</p>";
     body += "<hr><em>TinyWebServer</em></body></html>";
 
     buff.Append("Content-length: " + to_string(body.size()) + "\r\n\r\n");

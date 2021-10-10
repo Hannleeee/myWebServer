@@ -52,22 +52,6 @@ bool HttpRequest::IsKeepAlive() const {
     return false;
 }
 
-string HttpRequest::GetPost(const string &key) const {
-    assert(key != "");
-    if (_post.count(key) == 1) {
-        // []运算符不支持const修饰的变量，可以使用at()代替
-        return _post.at(key);
-    }
-    return "";
-}
-
-string HttpRequest::GetPost(const char *key) const {
-    assert(key != nullptr);
-    if (_post.count(key) == 1) {
-        return _post.at(key);
-    }
-}
-
 bool HttpRequest::_ParseRequestLine(const string &line) {
     regex pattern("^([^ ]*) ([^ ]*) HTTP/([^ ]*)$");    // 匹配请求行
     smatch subMatch;
@@ -167,7 +151,7 @@ bool HttpRequest::UserVerify(const string &name, const string &pwd, bool isLogin
     bool flag = false;              // 假设用户名可用
     // unsigned int fieldNum = 0;      // 结果集中列数
     char order[256] = {0};
-    MYSQL_FIELD *fields = nullptr;  // 字段信息指针，即字段名、类型和大小
+    // MYSQL_FIELD *fields = nullptr;  // 字段信息指针，即字段名、类型和大小
     MYSQL_RES *res = nullptr;       // mysql查询结果集
 
     if (!isLogin) flag = true;      // 不是登录，则为注册，并假设校验成功
