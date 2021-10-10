@@ -37,7 +37,7 @@ public:
     ~HttpRequest() = default;
 
     void Init();
-    bool parse(Buffer &buff);
+    bool Parse(Buffer &buff);
 
     std::string GetPath() const;
     std::string &GetPath();
@@ -64,8 +64,8 @@ private:
     std::unordered_map<std::string, std::string> _header;
     std::unordered_map<std::string, std::string> _post;
 
-    static const std::unordered_set<std::string> _DEFAULT_HTML;
-    static const std::unordered_map<std::string, int> _DEFAULT_HTML_TAG;
+    static const std::unordered_set<std::string> _DEFAULT_HTML;     // 页面路径集合
+    static const std::unordered_map<std::string, int> _DEFAULT_HTML_TAG;    // 注册和登录页面地址集合
     static int _ConvertHex(char ch);
 };
 
