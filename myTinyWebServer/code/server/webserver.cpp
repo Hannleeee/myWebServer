@@ -119,7 +119,6 @@ void WebServer::_OnWrite(HttpConn *client) {
     _CloseConn(client);
 }
 
-// ???后边再来看
 void WebServer::_DealRead(HttpConn *client) {
     assert(client);
     _ExtentTime(client);
@@ -202,10 +201,6 @@ bool WebServer::_InitSocket() {
     return true;
 }
 
-void WebServer::Start() {
-    
-}
-
 WebServer::WebServer(
     int port, int trigMode, int timeoutMS, bool optLinger,
     int sqlPort, const char *sqlUser, const char *sqlPwd,
@@ -217,12 +212,28 @@ WebServer::WebServer(
     // 获取当前路径
     _srcDir = getcwd(nullptr, 256);
     assert(_srcDir);
-    // 添加路径后缀
+    // 添加resource路径
     strncat(_srcDir, "/resource/", 16);
     HttpConn::userCount = 0;
     HttpConn::srcDir = _srcDir;
     SqlConnPool::Instatnce()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);
 
+    _InitEventMode(trigMode);
+    if (!_InitSocket()) _isClose = true;
+
+    if (openLog) {
+        Log::Instance()->Init(logLevel, "./log", ".log", logQueSize);
+        if (_isClose) { LOG_ERROR("========== Server Initialization Error! ========"); }
+        else {
+            LOG_INFO("========== Server Initialization ========");
+            LOG_INFO("Port:%d, OpenLinger: %s", _port, optLinger ? "true" : "false");
+            LOG_INFO("Listen Mode: %s, OpenConn Mode: %s", (_listenEvent & EPOLLET ? "ET" : "LT"),
+                        (_connEvent & EPOLLET ? "ET" : "LT"));
+            LOG_INFO("LogSys level: %d", logLevel);
+            LOG_INFO("srcDir: %s", HttpConn::srcDir);
+            LOG_INFO("SqlConnPool num: %d, ThreadPool num: %d", connPoolNum, threadNum);
+        }
+    }
 }
 
 WebServer::~WebServer() {
@@ -230,4 +241,36 @@ WebServer::~WebServer() {
     _isClose = true;
     free(_srcDir);
     SqlConnPool::Instatnce()->ClosePool();
+}
+
+void WebServer::Start() {
+    int timeMS = -1;
+    if (!_isClose) { LOG_INFO("======== Server Start ========"); }
+    while (_isClose) {
+        if (_timeoutMS > 0) {
+            timeMS = _timer->GetNextTick();
+        }
+        int eventCnt = _epoller->Wait(timeMS);
+        for (int i = 0; i < eventCnt; ++i) {
+            int fd = _epoller->GetEventFd(i);
+            uint32_t events = _epoller->GetEvents(i);
+            if (fd == _listenFd) {
+                _DealListen();
+            }
+            else if (events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)) {
+                assert(_users.count(fd) > 0);
+                _CloseConn(&_users[fd]);
+            }
+            else if (events & EPOLLIN) {
+                assert(_users.count(fd) > 0);
+                _DealRead(&_users[fd]);
+            }
+            else if (events & EPOLLOUT) {
+                assert(_users.count(fd) > 0);
+                _DealWrite(&_users[fd]);
+            } else {
+                LOG_ERROR("Unexpected event");
+            }
+        }
+    }
 }
