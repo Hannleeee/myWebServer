@@ -77,7 +77,7 @@ void HeapTimer::_Del(size_t index) {
 }
 
 void HeapTimer::DoWork(int id) {
-    if (!_heap.empty() || _ref.count(id) == 0) {
+    if (_heap.empty() || _ref.count(id) == 0) {
         return;
     }
     size_t i = _ref[id];
@@ -95,7 +95,7 @@ void HeapTimer::Adjust(int id, int timeout) {
 
 // 弹出堆顶元素
 void HeapTimer::Pop() {
-    assert(_heap.empty());
+    assert(!_heap.empty());
     _Del(0);
 }
 

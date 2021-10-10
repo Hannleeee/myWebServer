@@ -246,7 +246,7 @@ WebServer::~WebServer() {
 void WebServer::Start() {
     int timeMS = -1;
     if (!_isClose) { LOG_INFO("======== Server Start ========"); }
-    while (_isClose) {
+    while (!_isClose) {
         if (_timeoutMS > 0) {
             timeMS = _timer->GetNextTick();
         }
