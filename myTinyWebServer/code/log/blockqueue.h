@@ -94,7 +94,9 @@ size_t BlockDeque<T>::Capacity() {
 template<typename T>
 void BlockDeque<T>::PushBack(const T &item) {
     std::unique_lock<std::mutex> locker(_mtx);
-    while (_deq.size() >= _capacity) _condProducer.wait(locker);
+    while (_deq.size() >= _capacity) {
+        _condProducer.wait(locker);
+    }
     _deq.push_back(item);
     _condConsumer.notify_one();
 }
@@ -138,8 +140,12 @@ template<typename T>
 bool BlockDeque<T>::Pop(T &item, int timeout) {
     std::unique_lock<std::mutex> locker(_mtx);
     while (_deq.empty()) {
-        if (_condConsumer.wait_for(locker, std::chrono::seconds(timeout)) == std::cv_status::timeout) return false;
-        if (_isClose) return false;
+        if (_condConsumer.wait_for(locker, std::chrono::seconds(timeout)) == std::cv_status::timeout) {
+            return false;
+        }
+        if (_isClose) {
+            return false;
+        }
     }
     item = _deq.front();
     _deq.pop_front();

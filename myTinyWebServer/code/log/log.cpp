@@ -41,7 +41,7 @@ void Log::_AsyncWrite() {
     }
 }
 
-// 强制刷新缓冲区写入日志
+// 异步写线程函数
 void Log::FlushLogThread() {
     Log::Instance()->_AsyncWrite();
 }
@@ -141,7 +141,6 @@ void Log::Write(int level, const char *format, ...) {
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s-%d%s", _path, tail, (_lineCount / MAX_LINES), _suffix);
         }
 
-        // 这里是在干啥？？？
         locker.lock();
         Flush();
         fclose(_fp);
@@ -156,7 +155,7 @@ void Log::Write(int level, const char *format, ...) {
                     t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
                     t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
         _buff.HasWritten(n);
-        _AppendLogLevelTitle(level);    // 不应该放在前边吗？？？
+        _AppendLogLevelTitle(level);
 
         va_start(vaList, format);       // 可变参数初始化
         // 涉及可变参数的专用snprintf
@@ -164,7 +163,7 @@ void Log::Write(int level, const char *format, ...) {
         va_end(vaList);                 // 结束可变参数的获取
 
         _buff.HasWritten(m);
-        _buff.Append("\n\0", 2);        // ？用处？
+        _buff.Append("\n\0", 2);
 
         // 阻塞队列未满
         if (_isAsync && _deque && !_deque->Full()) {
@@ -179,7 +178,9 @@ void Log::Write(int level, const char *format, ...) {
 Log::~Log() {
     // 关闭写线程
     if (_writeThread && _writeThread->joinable()) {
-        while (!_deque->Empty()) _deque->Flush();
+        while (!_deque->Empty()) {
+            _deque->Flush();
+        }
         _deque->Close();
         _writeThread->join();
     }

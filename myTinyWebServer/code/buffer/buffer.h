@@ -44,7 +44,7 @@ private:
     const char *_BeginPtr() const;
     void _MakeSpace(size_t len);
 
-    std::vector<char> _buffer;  // 使用vector类型的char数组作为buffer
+    std::vector<char> _buffer;  // 使用vector封装char作为buffer
     std::atomic<std::size_t> _readPos;  // 当前buffer读取位置
     std::atomic<std::size_t> _writePos; // 当前buffer写入位置
 };
