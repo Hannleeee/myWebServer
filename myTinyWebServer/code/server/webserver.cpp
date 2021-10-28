@@ -213,7 +213,7 @@ WebServer::WebServer(
     _srcDir = getcwd(nullptr, 256);
     assert(_srcDir);
     // 添加resource路径
-    strncat(_srcDir, "/resource/", 16);
+    strncat(_srcDir, "/resources/", 16);
     HttpConn::userCount = 0;
     HttpConn::srcDir = _srcDir;
     SqlConnPool::Instatnce()->Init("localhost", sqlPort, sqlUser, sqlPwd, dbName, connPoolNum);

@@ -104,7 +104,9 @@ void BlockDeque<T>::PushBack(const T &item) {
 template<typename T>
 void BlockDeque<T>::PushFront(const T &item) {
     std::unique_lock<std::mutex> locker(_mtx);
-    while (_deq.size() >= _capacity) _condProducer.wait(locker);
+    while (_deq.size() >= _capacity) {
+        _condProducer.wait(locker);
+    }
     _deq.push_front(item);
     _condConsumer.notify_one();
 }
@@ -128,7 +130,9 @@ bool BlockDeque<T>::Pop(T &item) {
     while (_deq.empty()) {
         // 库存为空，所以消费者需要等待嘛
         _condConsumer.wait(locker);
-        if (_isClose) return false;
+        if (_isClose) {
+            return false;
+        }
     }
     item = _deq.front();
     _deq.pop_front();

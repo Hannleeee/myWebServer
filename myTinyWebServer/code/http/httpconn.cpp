@@ -22,7 +22,13 @@ void HttpConn::init(int fd, const sockaddr_in &addr) {
 }
 
 void HttpConn::Close() {
-
+    _response.UnmapFile();
+    if (_isClose == false) {
+        _isClose = true;
+        --userCount;
+        close(_fd);
+        LOG_INFO("Client[%d](%s:%d) quit, UserCount:%d", _fd, GetIP(), GetPort(), (int)userCount);
+    }
 }
 
 int HttpConn::GetFd() const {
